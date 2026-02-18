@@ -1,0 +1,15 @@
+[pipeline]
+name = "local-dev"
+run_id = "manual"
+
+[paths]
+raw_dir = "data/raw"
+processed_dir = "data/processed"
+reports_dir = "data/processed"
+
+[sources]
+csv_files = ["data/raw/observations.csv"]
+json_files = ["data/raw/observations.json"]
+
+[output]
+format = "parquet"  # we will implement parquet vs csv later

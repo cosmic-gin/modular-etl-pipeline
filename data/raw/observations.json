@@ -1,0 +1,4 @@
+[
+  {"id": 10, "timestamp": "2026-02-18T10:00:00Z", "humidity": 0.42, "site": "BERLIN_A"},
+  {"id": 11, "timestamp": "2026-02-18T10:05:00Z", "humidity": 0.45, "site": "BERLIN_A"}
+]

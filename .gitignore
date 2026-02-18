@@ -11,3 +11,11 @@ __pycache__/
 
 # Data outputs (we'll decide later what to commit)
 data/processed/*
+
+# Build/install artifacts
+*.egg-info/
+.ruff_cache/
+
+# Build/install artifacts
+*.egg-info/
+.ruff_cache/
