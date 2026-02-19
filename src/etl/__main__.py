@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from dataclasses import replace
 from pathlib import Path
 
 from etl.config import load_config
@@ -18,11 +19,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Modular ETL pipeline (local entrypoint)")
     parser.add_argument("--config", default="pipeline.toml")
     parser.add_argument("--log-level", default="INFO")
+    parser.add_argument("--run-id", default=None, help="Override run_id from config")
     args = parser.parse_args()
 
     setup_logging(args.log_level)
     cfg = load_config(Path(args.config))
-
+    if args.run_id:
+        cfg = replace(cfg, run_id=args.run_id)
     records = ingest_all(cfg)
     valid, issues = validate_records(cfg, records)
 

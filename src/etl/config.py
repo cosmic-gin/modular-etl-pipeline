@@ -33,21 +33,26 @@ def load_config(path: Path) -> PipelineConfig:
     with path.open("rb") as f:
         data = tomllib.load(f)
 
+    base_dir = path.parent.resolve()
+
+    def _resolve(p: str) -> Path:
+        pp = Path(p)
+        return pp if pp.is_absolute() else (base_dir / pp).resolve()
+
     v = data["validation"]
     out = data["output"]
 
-    # runtime is optional; default to 1 (no parallelism) if not present
     rt = data.get("runtime", {})
     max_workers = int(rt.get("max_workers", 1))
 
     return PipelineConfig(
         name=data["pipeline"]["name"],
         run_id=data["pipeline"]["run_id"],
-        raw_dir=Path(data["paths"]["raw_dir"]),
-        processed_dir=Path(data["paths"]["processed_dir"]),
-        reports_dir=Path(data["paths"]["reports_dir"]),
-        csv_files=[Path(p) for p in data["sources"]["csv_files"]],
-        json_files=[Path(p) for p in data["sources"]["json_files"]],
+        raw_dir=_resolve(data["paths"]["raw_dir"]),
+        processed_dir=_resolve(data["paths"]["processed_dir"]),
+        reports_dir=_resolve(data["paths"]["reports_dir"]),
+        csv_files=[_resolve(p) for p in data["sources"]["csv_files"]],
+        json_files=[_resolve(p) for p in data["sources"]["json_files"]],
         max_workers=max_workers,
         allowed_sites=list(v["allowed_sites"]),
         temp_c_min=float(v["temp_c_min"]),
