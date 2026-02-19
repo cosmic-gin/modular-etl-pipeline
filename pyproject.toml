@@ -6,6 +6,16 @@ build-backend = "setuptools.build_meta"
 name = "modular-etl-pipeline"
 version = "0.0.0"
 requires-python = ">=3.12"
+dependencies = [
+  "pandas>=2.2",
+  "pyarrow>=16",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.15",
+  "pytest>=9.0",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -18,7 +28,7 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]  # errors, pyflakes, import sorting
+select = ["E", "F", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

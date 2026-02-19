@@ -1,0 +1,15 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Install your package + runtime deps declared in pyproject.toml
+COPY pyproject.toml /app/pyproject.toml
+COPY src /app/src
+
+RUN pip install --no-cache-dir .
+
+# default command (compose can override)
+CMD ["python", "-m", "etl", "--config", "pipeline.toml", "--log-level", "INFO"]

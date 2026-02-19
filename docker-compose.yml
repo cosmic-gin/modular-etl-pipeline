@@ -1,0 +1,10 @@
+services:
+  etl:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.etl
+    volumes:
+      - ./data:/app/data
+      - ./pipeline.toml:/app/pipeline.toml:ro
+      - ./pipeline_bad.toml:/app/pipeline_bad.toml:ro
+    command: ["python", "-m", "etl", "--config", "pipeline.toml", "--log-level", "INFO"]
