@@ -19,3 +19,6 @@ data/processed/*
 # Build/install artifacts
 *.egg-info/
 .ruff_cache/
+
+# Test/Lint caches
+.pytest_cache/
