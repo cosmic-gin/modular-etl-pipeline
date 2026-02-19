@@ -35,3 +35,6 @@ logs/
 
 # Secrets
 .env
+
+# Secrets
+.env
