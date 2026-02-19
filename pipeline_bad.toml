@@ -11,6 +11,9 @@ reports_dir = "data/processed"
 csv_files = ["data/raw/observations_bad.csv"]
 json_files = ["data/raw/observations_bad.json"]
 
+[runtime]
+max_workers = 4
+
 [validation]
 allowed_sites = ["BERLIN_A"]
 temp_c_min = -40.0

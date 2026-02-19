@@ -17,6 +17,8 @@ class PipelineConfig:
     csv_files: list[Path]
     json_files: list[Path]
 
+    max_workers: int
+
     allowed_sites: list[str]
     temp_c_min: float
     temp_c_max: float
@@ -34,6 +36,10 @@ def load_config(path: Path) -> PipelineConfig:
     v = data["validation"]
     out = data["output"]
 
+    # runtime is optional; default to 1 (no parallelism) if not present
+    rt = data.get("runtime", {})
+    max_workers = int(rt.get("max_workers", 1))
+
     return PipelineConfig(
         name=data["pipeline"]["name"],
         run_id=data["pipeline"]["run_id"],
@@ -42,6 +48,7 @@ def load_config(path: Path) -> PipelineConfig:
         reports_dir=Path(data["paths"]["reports_dir"]),
         csv_files=[Path(p) for p in data["sources"]["csv_files"]],
         json_files=[Path(p) for p in data["sources"]["json_files"]],
+        max_workers=max_workers,
         allowed_sites=list(v["allowed_sites"]),
         temp_c_min=float(v["temp_c_min"]),
         temp_c_max=float(v["temp_c_max"]),
