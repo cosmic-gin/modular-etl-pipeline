@@ -22,3 +22,16 @@ data/processed/*
 
 # Test/Lint caches
 .pytest_cache/
+
+# Airflow local
+.env
+logs/
+
+# Local environment (do not commit)
+.env
+
+# Local secrets
+.env
+
+# Secrets
+.env

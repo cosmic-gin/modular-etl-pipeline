@@ -1,4 +1,91 @@
 services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+      PYTHONPATH: /opt/project/src
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./:/opt/project
+    user: "${AIRFLOW_UID:-50000}:0"
+    ports:
+      - "8080:8080"
+    command: webserver
+    restart: unless-stopped
+
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+      PYTHONPATH: /opt/project/src
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./:/opt/project
+    user: "${AIRFLOW_UID:-50000}:0"
+    command: scheduler
+    restart: unless-stopped
+
+  airflow-init:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      PYTHONPATH: /opt/project/src
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./:/opt/project
+    user: "${AIRFLOW_UID:-50000}:0"
+    command:
+      - bash
+      - -c
+      - >
+        airflow db migrate && airflow users create --username ${AIRFLOW_ADMIN_USERNAME} --password ${AIRFLOW_ADMIN_PASSWORD} --firstname ${AIRFLOW_ADMIN_FIRSTNAME} --lastname ${AIRFLOW_ADMIN_LASTNAME} --role Admin --email ${AIRFLOW_ADMIN_EMAIL} || true
+    restart: "no"
+
   etl:
     build:
       context: .
@@ -7,4 +94,7 @@ services:
       - ./data:/app/data
       - ./pipeline.toml:/app/pipeline.toml:ro
       - ./pipeline_bad.toml:/app/pipeline_bad.toml:ro
-    command: ["python", "-m", "etl", "--config", "pipeline.toml", "--log-level", "INFO"]
+    command: ["python", "-m", "etl", "--config", "pipeline.toml", "--run-id", "manual", "--log-level", "INFO"]
+
+volumes:
+  postgres-db-volume:
