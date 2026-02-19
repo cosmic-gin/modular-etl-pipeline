@@ -19,7 +19,7 @@ with DAG(
         bash_command=(
             "python -m etl "
             "--config /opt/project/pipeline.toml "
-            "--run-id {{ ts_nodash }} "
+            "--run-id {{ dag_run.run_id }}"
             "--log-level INFO"
         ),
     )
