@@ -7,6 +7,7 @@ from pathlib import Path
 from etl.config import load_config
 from etl.ingest import ingest_all
 from etl.utils.logging import setup_logging
+from etl.validate import validate_records, write_validation_report
 
 logger = logging.getLogger("etl")
 
@@ -21,8 +22,23 @@ def main() -> int:
     cfg = load_config(Path(args.config))
 
     records = ingest_all(cfg)
-    logger.info("Ingested %d records", len(records))
-    logger.info("First record: %s", records[0] if records else None)
+    valid, issues = validate_records(cfg, records)
+
+    logger.info(
+        "Validation summary: total=%d valid=%d invalid=%d",
+        len(records),
+        len(valid),
+        len(records) - len(valid),
+    )
+
+    report_path = cfg.reports_dir / f"validation_report_{cfg.run_id}.json"
+    write_validation_report(report_path, cfg, len(records), len(valid), issues)
+    logger.info("Wrote validation report: %s", report_path)
+
+    # For now: fail process if anything invalid (Airflow will treat as task failure later)
+    if issues:
+        logger.error("Validation failed with %d issues", len(issues))
+        return 2
 
     return 0
 

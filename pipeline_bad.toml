@@ -1,6 +1,6 @@
 [pipeline]
 name = "local-dev"
-run_id = "manual"
+run_id = "bad-run"
 
 [paths]
 raw_dir = "data/raw"
@@ -8,8 +8,8 @@ processed_dir = "data/processed"
 reports_dir = "data/processed"
 
 [sources]
-csv_files = ["data/raw/observations.csv"]
-json_files = ["data/raw/observations.json"]
+csv_files = ["data/raw/observations_bad.csv"]
+json_files = ["data/raw/observations_bad.json"]
 
 [validation]
 allowed_sites = ["BERLIN_A"]
