@@ -24,6 +24,7 @@ class PipelineConfig:
     humidity_max: float
 
     output_format: str
+    output_basename: str
 
 
 def load_config(path: Path) -> PipelineConfig:
@@ -31,6 +32,7 @@ def load_config(path: Path) -> PipelineConfig:
         data = tomllib.load(f)
 
     v = data["validation"]
+    out = data["output"]
 
     return PipelineConfig(
         name=data["pipeline"]["name"],
@@ -45,5 +47,6 @@ def load_config(path: Path) -> PipelineConfig:
         temp_c_max=float(v["temp_c_max"]),
         humidity_min=float(v["humidity_min"]),
         humidity_max=float(v["humidity_max"]),
-        output_format=data["output"]["format"],
+        output_format=str(out["format"]),
+        output_basename=str(out["output_basename"]),
     )

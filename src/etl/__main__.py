@@ -6,6 +6,8 @@ from pathlib import Path
 
 from etl.config import load_config
 from etl.ingest import ingest_all
+from etl.load import write_outputs
+from etl.transform import normalize_records
 from etl.utils.logging import setup_logging
 from etl.validate import validate_records, write_validation_report
 
@@ -31,15 +33,19 @@ def main() -> int:
         len(records) - len(valid),
     )
 
-    report_path = cfg.reports_dir / f"validation_report_{cfg.run_id}.json"
-    write_validation_report(report_path, cfg, len(records), len(valid), issues)
-    logger.info("Wrote validation report: %s", report_path)
+    validation_report_path = cfg.reports_dir / f"validation_report_{cfg.run_id}.json"
+    write_validation_report(validation_report_path, cfg, len(records), len(valid), issues)
+    logger.info("Wrote validation report: %s", validation_report_path)
 
-    # For now: fail process if anything invalid (Airflow will treat as task failure later)
     if issues:
         logger.error("Validation failed with %d issues", len(issues))
         return 2
 
+    rows = normalize_records(valid)
+    data_path, summary_path = write_outputs(cfg, rows)
+
+    logger.info("Wrote processed data: %s", data_path)
+    logger.info("Wrote run summary: %s", summary_path)
     return 0
 
 

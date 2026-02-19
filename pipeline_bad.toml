@@ -20,3 +20,4 @@ humidity_max = 1.0
 
 [output]
 format = "parquet"
+output_basename = "observations_cleaned"
